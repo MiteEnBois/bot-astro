@@ -14,15 +14,14 @@ from verbecc import Conjugator
 from verbecc.exceptions import ConjugatorError
 from random import shuffle, randint, seed
 
-
 # python -m pip -r install requirements.txt
+
 
 # ----------------------------- SETUP VARIABLES GLOBALES ET BOT
 print("start loading")
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-PASSWORD = os.getenv('PASSWORD')
 
 bot = commands.Bot(command_prefix='##')
 
