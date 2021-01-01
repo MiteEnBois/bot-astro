@@ -28,13 +28,6 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix='##')
 
-insultes = []
-with open("insultes.yml", mode="r", encoding='utf-8') as f:
-    insultes = yaml.load(f, Loader=yaml.FullLoader)
-    f.close()
-
-cg = Conjugator(lang='fr')
-
 # code pour acceder à l'api
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
