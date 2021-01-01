@@ -6,6 +6,8 @@ import yaml
 from datetime import date
 import time
 from oauth2client.service_account import ServiceAccountCredentials
+import discord
+import io
 from discord.ext import commands
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
@@ -13,6 +15,7 @@ from datetime import datetime, timedelta, date
 from verbecc import Conjugator
 from verbecc.exceptions import ConjugatorError
 from random import shuffle, randint, seed
+import numpy as np
 
 # python -m pip -r install requirements.txt
 
@@ -92,11 +95,13 @@ def update_db():
 
     sheets = client.open("Tableau Date de Naissance").worksheets()
     db = []
-
+    nb_anime = 0
+    nb_perso = 0
     for sh in sheets:
         delta = time.time()
         title = sh.title
         if title not in anime and title not in ["Front", "Template"]:
+            nb_anime += 1
             for x in sh.get_all_values():
                 if x[0] == "Personnage" or x[0] == "" or x[1] == "" or x[1] == "???":
                     continue
@@ -111,6 +116,7 @@ def update_db():
                 row = (i, x[0], title, jour, mois, annee, x[2])
                 db.append(row)
                 i += 1
+                nb_perso += 1
             print(f"{title} : {time.time()-delta}")
             while time.time()-delta <= 1.05:
                 time.sleep(.01)
@@ -118,14 +124,18 @@ def update_db():
     c.executemany('INSERT INTO personnages VALUES (?,?,?,?,?,?,?)', db)
 
     conn.commit()
+    return [nb_anime, nb_perso]
 
 
 update_db()
 
-signetab = {"belier": [80, 110], "taureau": [111, 140], "gémeaux": [141, 172], "cancer": [173, 203], "lion": [204, 234], "vierge": [235, 265], "balance": [266, 295], "scorpion": [296, 326], "sagittaire": [327, 355], "verseau": [21, 50], "poissons": [51, 79]}
+signetab = {"belier": [80, 110], "taureau": [111, 140], "gémeaux": [141, 172], "cancer": [173, 203], "lion": [204, 234], "vierge": [235, 265], "balance": [266, 295], "scorpion": [296, 326], "sagittaire": [327, 355], "capricorne": [0, 0], "verseau": [21, 50], "poissons": [51, 79]}
+signecolor = {"belier": "lightcoral", "taureau": "greenyellow", "gémeaux": "palegoldenrod", "cancer": "lightblue", "lion": "indianred", "vierge": "lightgreen", "balance": "khaki", "scorpion": "cyan", "sagittaire": "red", "capricorne": "forestgreen", "verseau": "goldenrod", "poissons": "royalblue"}
 
 
 def trouve_signe(jour):
+    if jour >= 356 or jour <= 20:
+        return "capricorne"
     for s in signetab:
         if s == "capricorne":
             if jour <= signetab[s][0] or jour >= signetab[s][1]:
@@ -133,8 +143,25 @@ def trouve_signe(jour):
         else:
             if jour >= signetab[s][0] and jour <= signetab[s][1]:
                 return s
-    if jour >= 356 or jour <= 20:
-        return "capricorne"
+    return ""
+
+
+def str_to_day(signe):
+    search = re.search("([0-9]{1,2})/([0-9]{1,2})(/([0-9]{4}))?", signe)
+    if search is None:
+        return -1
+    day = int(search.group(1))
+    month = int(search.group(2))
+    if day == 29 and month == 2:
+        day = 28
+    return int(date(2019, month, day).timetuple().tm_yday)
+
+
+@bot.command(name='update', help='Ping!')
+async def update(ctx):
+    await ctx.send("Update lancée")
+    tab = update_db()
+    await ctx.send(f"Update terminée:\nAnimes rajoutés : {tab[0]}\nPersos rajoutés : {tab[1]}")
 
 
 @bot.command(name='list', help='##liste (anime). Liste les animes cherchables.\nSi un anime est fourni, affiche si il est cherchable')
@@ -194,75 +221,40 @@ async def astro(ctx, signe, *arr,):
         await ctx.send(f"```{txt}```")
 
 
-@bot.command(name='conjugue', help='Conjuge un verbe')
-async def conjugue(ctx,
-                   verbe,
-                   mode="indicatif",
-                   temps="présent",
-                   pronom=""):
-    try:
-        conjugaison = cg.conjugate(verbe)
-    except ConjugatorError:
-        await ctx.send(f"Nique ta mere c'est pas un verbe")
+@bot.command(name='graph', help='Ping!')
+async def graph(ctx, *arr):
+    origine = ' '.join(arr)
+    data = []
+    labels = []
+    colors = []
+    title = "Total"
+    query = "SELECT signe, count(nom) FROM personnages GROUP BY signe"
+    if origine != "":
+        query = query.replace("personnages", f'personnages WHERE lower(origine) = "{origine.lower()}"')
+        title = origine
+    temp_dict = {}
+    for row in c.execute(query):
+        temp_dict[row[0].lower()] = row[1]
+    if temp_dict == {}:
+        await ctx.send(f"Anime pas reconnu, vérifiez l'ortographe avec ##list")
         return
-    if pronom == "":
-        pronom = -1
-    if mode not in conjugaison["moods"]:
-        txt = ""
-        for x in conjugaison['moods']:
-            txt += x+", "
-        await ctx.send(f"Temps utilisable : {txt[:-2]}")
-        return
-    if temps not in conjugaison["moods"][mode]:
-        txt = ""
-        for x in conjugaison['moods'][mode]:
-            txt += x+", "
-        await ctx.send(f"Temps utilisable avec {mode} : {txt[:-2]}")
-        return
-    try:
-        pronom = int(pronom)
-    except ValueError:
-        i = 0
-        for x in conjugaison["moods"][mode][temps]:
-            if pronom in x:
-                pronom = i
-                break
-            i += 1
-        if pronom != i:
-            await ctx.send(f"{pronom} n'a pas été trouvé pour {mode} et {temps}")
-    txt = ""
-    if pronom == -1:
-        for x in conjugaison["moods"][mode][temps]:
-            txt += x + ", "
-        txt = txt[:-2]
-    else:
-        txt = conjugaison["moods"][mode][temps][pronom]
-    await ctx.send(txt)
+    for x in signetab:
+        if x not in temp_dict:
+            continue
+        labels.append(f"{x} : {temp_dict[x]}")
+        data.append(temp_dict[x])
+        colors.append(signecolor[x])
 
+    fig, ax1 = plt.subplots()
+    ax1.pie(data, labels=labels, autopct='%1.1f%%', counterclock=False, startangle=90, colors=colors)
+    ax1.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    plt.title(title)
+    # plt.show()
+    fig = io.BytesIO()
 
-def insulte_gen():
-    starter = ["espèce de ", "sale ", "fils de ", "connard de ", "gros "]
-    start = starter[randint(0, len(starter) - 1)]
-    insulte = insultes[randint(0, len(insultes) - 1)]
-    voy = ["a", "e", "i", "o", "u", "y", "é", "è"]
-    if (start[-4:] == " de "
-            and insulte[0].lower() in voy) or (insulte[0].lower() == "h"
-                                               and insulte[1].lower() in voy):
-        start = start[:-4] + " d'"
-    link = "https://fr.wiktionary.org/wiki/" + insulte.replace(" ", "_")
-    return f"{start}**{insulte}**\n||{link}||"
-
-
-@bot.command(name='insulte', help='')
-async def insulte(ctx, *arr):
-    l = " ".join(arr)
-    if "@everyone" in str(ctx.message.content):
-        await ctx.send(f"{ctx.author.mention}, parce que tu a tenté, {insulte_gen()}")
-        return
-    if l != "":
-        l += ', '
-    await ctx.send(f"{l}{insulte_gen()}")
-
+    plt.savefig(fig, bbox_inches='tight', format="png")
+    fig.seek(0)
+    await ctx.send(file=discord.File(fig, title+'.png'))
 
 # ----------------------------- FIN SETUP
 
@@ -273,11 +265,6 @@ async def insulte(ctx, *arr):
 async def on_message(message):
     if message.author == bot.user:
         return
-    if bot.user.mentioned_in(message):
-        vrai_insulte = ["Nique tes morts en fait", "C'est pas ta mère qui est une célèbre pute ?", "Va te faire enculer pour voir ?", "you can't tell me what to do!", "T'aimes ça quand je te ping fils de pute ?"]
-        await message.channel.send(f"{message.author.mention}, {vrai_insulte[randint(0,len(vrai_insulte)-1)]}")
-        return
-
     await bot.process_commands(message)
 
 
