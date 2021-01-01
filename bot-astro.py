@@ -2,7 +2,6 @@ import os
 import gspread
 import sqlite3
 import re
-import yaml
 from datetime import date
 import time
 from oauth2client.service_account import ServiceAccountCredentials
@@ -12,10 +11,6 @@ from discord.ext import commands
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta, date
-from verbecc import Conjugator
-from verbecc.exceptions import ConjugatorError
-from random import shuffle, randint, seed
-import numpy as np
 
 # python -m pip -r install requirements.txt
 
