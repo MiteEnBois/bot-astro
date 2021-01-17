@@ -136,3 +136,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 bot-astro-debug.py
+bot-astro old.py
+astro copy.db
+bot-astro copy.py
