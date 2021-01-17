@@ -555,7 +555,7 @@ async def ping(ctx):
 # c.execute(f'INSERT INTO utilisateurs VALUES ({4646},{18},{2})')
 # c.execute(f'INSERT INTO appartenances_serveurs VALUES ({370295251983663114} ,{4646})')
 
-print(next_bday(370295251983663114))
+# print(next_bday(370295251983663114))
 
 
 @bot.event
