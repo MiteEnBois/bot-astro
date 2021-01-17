@@ -30,7 +30,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 intents = Intents.default()
 intents.members = True
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='##', intents=intents)
 
 # code pour acceder à l'api
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
