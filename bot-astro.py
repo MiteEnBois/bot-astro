@@ -30,7 +30,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 intents = Intents.default()
 intents.members = True
 
-bot = commands.Bot(command_prefix='##', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 # code pour acceder à l'api
 scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
@@ -359,7 +359,7 @@ async def liste(ctx, *arr):
             await ctx.send(f"Pas trouvé {origine} :/\nAnime qu'on a cherché mais où yavais pas de date : Berserk, Btooom, Darwin's Game, Dr Stone, Erased, FMA, Gurenn Lagan, Magi, SNK, DBZ")
     else:
         txt = "Anime cherchable: "
-        for row in c.execute('SELECT distinct origine FROM personnages'):
+        for row in c.execute('SELECT distinct origine FROM personnages order by origine'):
             txt += row[0]+", "
         await ctx.send(f"{txt[:-2]}")
 
