@@ -346,7 +346,7 @@ async def liste(ctx, *arr):
     if origine != "":
         tab = []
         reussite = []
-        for row in c.execute(f'SELECT distinct origine FROM personnages'):
+        for row in c.execute(f'SELECT distinct origine FROM personnages order by origine'):
             if origine.lower() in row[0].lower():
                 reussite.append(row[0])
         if reussite != []:
