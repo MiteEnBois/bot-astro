@@ -8,7 +8,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import discord
 import io
 import asyncio
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import Intents
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
@@ -266,6 +266,8 @@ async def checkBD():
     for guild in bot.guilds:
         txt = "On souhaite un joyeux anniversaire à "
         nexts = next_bday(guild.id)
+        if nexts is None:
+            continue
         channel = None
         for canal in c.execute(f'SELECT canal FROM serveurs where id = {guild.id}'):
             channel = canal[0]
@@ -287,17 +289,22 @@ async def checkBD():
             await guild.get_channel(channel).send(txt[:-2]+"!!")
 
 
+@tasks.loop(hours=24)
 async def timer():
-    await asyncio.sleep(60)
+    await checkBD()
 
-    now = datetime.now()
 
-    current_time = now.strftime("%H:%M")
-    # print("Current Time =", current_time)
+@timer.before_loop
+async def before_msg1():
+    for _ in range(60*60*24):  # loop the hole day
+        now = datetime.now()
+        current_time = now.strftime("%H:%M")
+        # print("Current Time =", now)
+        if(current_time == '7:00'):  # check if matches with the desired time
+            print("lets go")
+            return
+        await asyncio.sleep(1)  # wait a second before looping again. You can make it more
 
-    if(current_time == '07:00'):  # check if matches with the desired time
-        await checkBD()
-    await timer()
 
 # ----------------------------- COMMANDES
 
@@ -552,8 +559,8 @@ async def ping(ctx):
 
 # ----------------------------- FIN SETUP
 
-# c.execute(f'INSERT INTO utilisateurs VALUES ({4646},{18},{2})')
-# c.execute(f'INSERT INTO appartenances_serveurs VALUES ({370295251983663114} ,{4646})')
+# c.execute(f'INSERT INTO utilisateurs VALUES ({21},{23},{1})')
+# c.execute(f'INSERT INTO appartenances_serveurs VALUES ({370295251983663114} ,{21})')
 
 # print(next_bday(370295251983663114))
 
@@ -586,7 +593,7 @@ async def on_ready():
         print(f'-{guild.name}')
     print(f'{bot.user} has started')
     update_db()
-    await timer()
+    timer.start()
 
 # lance le bot
 bot.run(TOKEN)
