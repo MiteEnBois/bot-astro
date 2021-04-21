@@ -403,6 +403,34 @@ async def astro(ctx, signe="", *arr):
     embed.set_author(name="AstroBot", url="https://github.com/MiteEnBois/bot-astro", icon_url="https://i2.wp.com/multiversitystatic.s3.amazonaws.com/uploads/2018/12/Shonen-Jump-logo.jpg")
     await ctx.send(embed=embed)
 
+help = """##astrodate <date>  Affiche tout les personnages ayant cette date de naissance, peut importe l'anime. 
+Si aucune date n'est fournie, utilise la date enregistrée de l'utilisateur discord si possible"""
+
+
+@bot.command(name='astrodate', help=help)
+async def astrodate(ctx, date=""):
+    if date == "":
+        for row in c.execute(f'SELECT jour || "/" || mois FROM utilisateurs where id = {ctx.author.id}'):
+            found = row[0]
+        if found is None:
+            await ctx.send(f"Veuillez entrer une date")
+            return
+        else:
+            date = found
+    d = date.split("/")
+    jour = int(d[0])
+    mois = int(d[1])
+    if jour <= 0 or jour >= 32 or mois <= 0 or mois >= 12:
+        await ctx.send(f"Date impossible")
+        return
+    description = ""
+    for row in c.execute(f'SELECT origine, nom  FROM personnages where jour="{jour}" and mois="{mois}" order by origine, nom'):
+        description += f"{row[0]}: **{row[1]}**\n"
+    embed = discord.Embed(title=f"Perso ayant {date} comme date de naissance", url="https://docs.google.com/spreadsheets/d/12rZUluWhjaikfK38hXo1xrNtDYyJF98OTFtdQ1kcFHI/edit?usp=sharing", description=description, color=0xbb1b1b)
+    embed.set_author(name="AstroBot", url="https://github.com/MiteEnBois/bot-astro", icon_url="https://i2.wp.com/multiversitystatic.s3.amazonaws.com/uploads/2018/12/Shonen-Jump-logo.jpg")
+    await ctx.send(embed=embed)
+
+
 help = """##graph (anime). Affiche le graphique de la distribution des signes dans la base de donnée
         Un anime peut etre donné pour voir la distribution dans cet anime uniquement"""
 
