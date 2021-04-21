@@ -2,7 +2,6 @@ import os
 import gspread
 import sqlite3
 import re
-from datetime import date
 import time
 from oauth2client.service_account import ServiceAccountCredentials
 import discord
@@ -117,7 +116,7 @@ def select(query):
     for row in c.execute(query):
         i = 0
         for col in row:
-            txt += f"{col} "+" "*(taille[i]-len(str(col)))
+            txt += f"{col} " + " " * (taille[i] - len(str(col)))
             i += 1
         txt += "\n"
     return txt
@@ -132,18 +131,18 @@ def next_bday(server_id):
             bd = date(today.year, row[2], row[1])
         except ValueError:
             continue
-        if len(nexts) > 0 and nexts[len(nexts)-1][1] != (bd-today).days:
+        if len(nexts) > 0 and nexts[len(nexts) - 1][1] != (bd - today).days:
             break
         if bd >= today:
-            nexts.append([bd, (bd-today).days, row[0]])
+            nexts.append([bd, (bd - today).days, row[0]])
     if len(nexts) == 0:
         for row in c.execute(f"SELECT u.id, u.jour, u.mois from appartenances_serveurs a, serveurs s, utilisateurs u where u.id = a.id_util and a.id_serveur = {server_id} and a.id_serveur = s.id order by u.mois, u.jour"):
             try:
-                bd = date(today.year+1, row[2], row[1])
+                bd = date(today.year + 1, row[2], row[1])
             except ValueError:
                 continue
             if bd >= today:
-                nexts.append([bd, (bd-today).days, row[0]])
+                nexts.append([bd, (bd - today).days, row[0]])
     if len(nexts) == 0:
         return None
     else:
@@ -161,7 +160,7 @@ def update_db():
         for row in c.execute('SELECT distinct origine FROM personnages'):
             anime.append(row[0])
         for x in c.execute('SELECT max(id) FROM personnages'):
-            i = x[0]+1
+            i = x[0] + 1
     except sqlite3.OperationalError:
         print("create personnages")
         c.execute('''CREATE TABLE personnages(id integer PRIMARY KEY, nom text, origine text,jour integer, mois integer, annee integer, signe text)''')
@@ -219,7 +218,7 @@ def update_db():
                 i += 1
                 nb_perso += 1
             print(f"{title} : {time.time()-delta}")
-            while time.time()-delta <= 1.05:
+            while time.time() - delta <= 1.05:
                 time.sleep(.01)
 
     c.executemany('INSERT INTO personnages VALUES (?,?,?,?,?,?,?)', db)
@@ -286,7 +285,7 @@ async def checkBD():
                 txt += f"{memberMention}, "
             print(row)
         if txt != "On souhaite un joyeux anniversaire à ":
-            await guild.get_channel(channel).send(txt[:-2]+"!!")
+            await guild.get_channel(channel).send(txt[:-2] + "!!")
 
 
 @tasks.loop(hours=24)
@@ -296,7 +295,7 @@ async def timer():
 
 @timer.before_loop
 async def before_msg1():
-    for _ in range(60*60*24):  # loop the hole day
+    for _ in range(60 * 60 * 24):  # loop the hole day
         now = datetime.now()
         current_time = now.strftime("%H:%M")
         # print("Current Time =", now)
@@ -359,7 +358,7 @@ async def liste(ctx, *arr):
         if reussite != []:
             txt = "Anime trouvé : "
             for x in reussite:
-                txt += x+", "
+                txt += x + ", "
             await ctx.send(f"{txt[:-2]}")
         else:
 
@@ -367,7 +366,7 @@ async def liste(ctx, *arr):
     else:
         txt = "Anime cherchable: "
         for row in c.execute('SELECT distinct origine FROM personnages order by origine'):
-            txt += row[0]+", "
+            txt += row[0] + ", "
         await ctx.send(f"{txt[:-2]}")
 
 help = """##astro signe anime. Affiche les perso du meme signe dans un anime.
@@ -442,7 +441,7 @@ async def graph(ctx, *arr):
 
     plt.savefig(fig, bbox_inches='tight', format="png")
     fig.seek(0)
-    await ctx.send(file=discord.File(fig, title+'.png'))
+    await ctx.send(file=discord.File(fig, title + '.png'))
 
 help = """Permet d'enregistrer sa date d'anniversaire"""
 
