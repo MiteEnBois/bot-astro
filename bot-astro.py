@@ -410,6 +410,7 @@ Si aucune date n'est fournie, utilise la date enregistrée de l'utilisateur disc
 @bot.command(name='astrodate', help=help)
 async def astrodate(ctx, date=""):
     if date == "":
+        found = None
         for row in c.execute(f'SELECT jour || "/" || mois FROM utilisateurs where id = {ctx.author.id}'):
             found = row[0]
         if found is None:
