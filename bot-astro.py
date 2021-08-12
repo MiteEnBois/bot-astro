@@ -300,6 +300,7 @@ async def before_msg1():
         current_time = now.strftime("%H:%M")
         # print("Current Time =", now)
         if(current_time == '7:00'):  # check if matches with the desired time
+            print("Current Time =", now)
             print("lets go")
             return
         await asyncio.sleep(1)  # wait a second before looping again. You can make it more
