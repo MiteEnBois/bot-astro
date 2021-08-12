@@ -421,7 +421,7 @@ async def astrodate(ctx, date=""):
     d = date.split("/")
     jour = int(d[0])
     mois = int(d[1])
-    if jour <= 0 or jour >= 32 or mois <= 0 or mois >= 12:
+    if jour < 1 or jour > 31 or mois < 1 or mois > 12:
         await ctx.send(f"Date impossible")
         return
     description = ""
