@@ -623,6 +623,12 @@ async def on_ready():
     print(f'{bot.user} has started')
     update_db()
     timer.start()
+    await bot.get_guild(int(os.getenv('ERROR_GUILD'))).get_channel(int(os.getenv('ERROR_CHANNEL'))).send("Usage Bot Loaded")
+
+
+@bot.event
+async def on_command_error(ctx, error):
+    await bot.get_guild(int(os.getenv('ERROR_GUILD'))).get_channel(int(os.getenv('ERROR_CHANNEL'))).send(error)
 
 # lance le bot
 bot.run(TOKEN)
