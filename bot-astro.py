@@ -622,7 +622,7 @@ async def on_ready():
         print(f'-{guild.name}')
     print(f'{bot.user} has started')
     update_db()
-    timer.start()
+    # timer.start()
     await bot.get_guild(int(os.getenv('ERROR_GUILD'))).get_channel(int(os.getenv('ERROR_CHANNEL'))).send("Bot Loaded")
 
 
