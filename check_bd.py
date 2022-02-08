@@ -33,7 +33,7 @@ bot = commands.Bot(command_prefix='##', intents=intents)
 
 
 # load la base de donnée
-conn = sqlite3.connect('astro.db')
+conn = sqlite3.connect(os.getcwd() + '\\astro.db')
 c = conn.cursor()
 
 
