@@ -367,7 +367,13 @@ async def liste(ctx, *arr):
     else:
         txt = "Anime cherchable: "
         for row in c.execute('SELECT distinct origine FROM personnages order by origine'):
-            txt += row[0] + ", "
+
+            temptxt = txt + row[0] + ", "
+            if len(temptxt) > 2000:
+                await ctx.send(f"{txt[:-2]}")
+                txt = row[0] + ", "
+            else:
+                txt = temptxt
         await ctx.send(f"{txt[:-2]}")
 
 help = """##astro signe anime. Affiche les perso du meme signe dans un anime.
