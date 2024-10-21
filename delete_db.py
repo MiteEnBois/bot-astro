@@ -42,5 +42,5 @@ if len(sys.argv) == 1:
 elif len(sys.argv) == 2:
     
     print(select(f'SELECT u.id, jour || "/" || mois from serveurs s, utilisateurs u, appartenances_serveurs a where u.id = a.id_util and a.id_serveur = s.id and s.id = {sys.argv[1]} order by mois, jour'))
-else 
+else:
     remove_user(sys.argv[1],sys.argv[2])
