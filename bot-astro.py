@@ -141,6 +141,8 @@ def next_bday(server_id):
                 bd = date(today.year + 1, row[2], row[1])
             except ValueError:
                 continue
+            if len(nexts) > 0 :
+                break
             if bd >= today:
                 nexts.append([bd, (bd - today).days, row[0]])
     if len(nexts) == 0:
